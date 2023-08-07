@@ -18,35 +18,6 @@ def define_plane(origin: list, normal: list) -> vtk.vtkPlane:
     return plane
 
 
-def cut_by_plane(polydata: vtk.vtkPolyData, clip_plane: vtk.vtkPlane):
-    # clip = vtk.vtkClipPolyData()
-    # clip.SetInputData(polydata)
-    # clip.SetClipFunction(clip_plane)
-    # clip.SetValue(0)
-    # # if inside_out_on:
-    # #     clipper.InsideOutOn()
-    # clip.SetOutputPointsPrecision(vtk.vtkAlgorithm.DOUBLE_PRECISION)
-    # clip.Update()
-    # Create the cutter and set its properties
-    # Create the cutter
-    cutter = vtk.vtkCutter()
-    cutter.SetInputData(polydata)
-    cutter.SetCutFunction(clip_plane)
-
-    # Create the cut bounds (a box defining the region of interest)
-    cutBounds = vtk.vtkBox()
-
-    c = [-28.40483375, 19.15802386, -101.39714685]
-    cutBounds.SetBounds(c[0], c[0] + 10, c[1], c[1] + 10, c[2], c[2] + 10)
-
-    # Clip the cutter using the cut bounds
-    clipper = vtk.vtkClipPolyData()
-    clipper.SetInputConnection(cutter.GetOutputPort())
-    clipper.SetClipFunction(cutBounds)
-
-    return clipper.GetOutput(), cutBounds
-
-
 def cut_by_bounds(polydata: vtk.vtkPolyData, bounds: list) -> vtk.vtkPolyData:
     plane1 = vtk.vtkPlane()
     plane1.SetOrigin(bounds[0], 0, 0)
