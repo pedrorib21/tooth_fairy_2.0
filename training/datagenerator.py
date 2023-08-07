@@ -57,6 +57,7 @@ class DataGenerator(tf.keras.utils.Sequence):
             zip(objs_filenames_temp, labels_temp)
         ):
             # Store sample
+            print(obj_file)
             polydata = loader.read_obj(obj_file)
             polydata_points = numpy_support.vtk_to_numpy(polydata.GetPoints().GetData())
             sampled_indices = random.sample(

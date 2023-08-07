@@ -1,5 +1,5 @@
 train:
-	python train.py --epochs=100 --teeth_to_identify=LeftMandibularSecondMolar --teeth_to_identify RightMandibularFirstMolar
+	python train.py --epochs=10 --teeth_to_identify=LeftMandibularSecondMolar
 
 evaluate:
-	python evaluate.py --teeth_to_identify=LeftMandibularSecondMolar -mp "data/tmp/models/23_07_31_06_08_2023/"
+	python evaluate.py --teeth_to_identify=LeftMandibularSecondMolar -mp "data/tmp/models/21_11_42_07_08_2023/"

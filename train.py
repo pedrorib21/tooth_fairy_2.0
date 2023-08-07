@@ -7,13 +7,13 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import time
 from vedo import Points, settings, show, Plotter, Mesh
-import pyvista as pv
 import vtk
 
 from models import pointnet_seg
 from training.callbacks import model_checkpoint, tensorboard_callback
 from training.datagenerator import DataGenerator
 from training.metrics import f1_metric
+from training.processer import Processer
 
 parser = argparse.ArgumentParser(description="")
 
@@ -33,7 +33,7 @@ EPOCHS = args.epochs
 NUM_POINTS = args.num_points
 LABELS_TO_IDENTIFY = args.teeth_to_identify
 
-with open("labels.json", "r") as f:
+with open("data/labels.json", "r") as f:
     teeth_name_label_dict = json.load(f)
 
 LABELS_TO_IDENTIFY = [teeth_name_label_dict[name] for name in args.teeth_to_identify]
@@ -55,33 +55,26 @@ label_files = [
 ]
 assert len(obj_files) == len(label_files)
 
+
 df = pd.DataFrame({"obj_file": obj_files, "label_file": label_files})
-read_and_parse_json = lambda file_path: json.load(open(file_path, "r"))
-df["labels"] = df["label_file"].apply(
-    lambda file_path: read_and_parse_json(file_path)["labels"]
-)
-df["has_selected_teeth"] = df["labels"].apply(
-    lambda labels: set(LABELS_TO_IDENTIFY).issubset(labels)
-)
-df_to_train = df[df["has_selected_teeth"]]
-df_to_train["train_labels"] = df_to_train["labels"].apply(
-    lambda labels: [label if label in LABELS_TO_IDENTIFY else 0 for label in labels]
-)
+processer = Processer(LABELS_TO_IDENTIFY)
+processed_df = processer.preprocessing(df)
+
 # Split data to train
 train_df, val_df = train_test_split(
-    df_to_train,
+    processed_df,
     test_size=0.2,
     random_state=42,
 )
 
 training_generator = DataGenerator(
     train_df["obj_file"].values,
-    train_df["train_labels"].values,
+    train_df["labels_of_interest"].values,
     num_classes=len(LABELS_TO_IDENTIFY),
 )
 validation_generator = DataGenerator(
     val_df["obj_file"].values,
-    val_df["train_labels"].values,
+    val_df["labels_of_interest"].values,
     num_classes=len(LABELS_TO_IDENTIFY),
 )
 
